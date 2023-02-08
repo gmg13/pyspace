@@ -4,7 +4,7 @@ import redis
 import time
 
 
-# Create the conection pool definitions
+# Create the static connection pool definitions
 pool = redis.ConnectionPool(host="localhost", port=6379, db=0)
 rconn = redis.Redis(connection_pool=pool)
 
@@ -27,6 +27,7 @@ def fire_event(name,
         exception=exception,
     )
 
+
 class RedisClient:
     "The Redis client that wraps the queries"
 
@@ -40,6 +41,7 @@ class RedisClient:
 
             try:
                 execute_query(name, *args, **kwargs)
+
                 # fire on success
                 fire_event(
                     name,
@@ -48,7 +50,6 @@ class RedisClient:
                     start_perf_counter,
                     {}
                 )
-
             except Exception as e:
                 fire_event(
                     name,
@@ -63,7 +64,6 @@ class RedisClient:
 
 
 class CustomTaskSet(TaskSet):
-
     def randstr(self):
         return f'key_{randint(0,99):0>3}'
 
@@ -78,6 +78,7 @@ class CustomTaskSet(TaskSet):
     @task(1)
     def delete(self):
         self.client.delete(self.randstr())
+
 
 # This class will be executed when you fire up locust
 class RedisUser(User):
